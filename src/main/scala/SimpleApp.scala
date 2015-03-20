@@ -102,7 +102,11 @@ object SimpleApp{
     val lines = ssc.socketTextStream(args(0), args(1).toInt)
 
     /*todo:
-        1. 遍历lines,过滤出组合信息，组合信息，更新到持久数据里面
+	python功能
+	1. 这个streaming起来前,启动一个python程序负责读取全部的mysql组合全量数据,发送给kafka,用来初始化组合信息
+           然后python程序订阅redis的股票实时价格信息,发送给kafka,spark streaming只从kafka上面接收所有的消息
+	scala功能
+        2. 遍历lines,过滤出组合信息，组合信息，更新到持久数据里面
     */
 
     val portfolios = lines.map(_.split(" ")).filter(filter_portfolio).map(process_portfolio)
@@ -117,11 +121,12 @@ object SimpleApp{
     // Update the cumulative count using updateStateByKey
     // This will give a Dstream made of state (which is the cumulative count of the words)
     //val stateDstream = wordDstream.updateStateByKey[Int](updateFunc)
+    //使用这个时间窗口接受到的组合修改信息，更新持久化到hdfs的组合明细
     val stateDstream = portfolios.updateStateByKey[Array[String]](updateFunc)
     stateDstream.print()
 
     /*todo:
-        2. 遍历line,过滤出股票信息，取最新的股票价格信息，遍历所以组合，计算每个组合的价格
+        3. 遍历line,过滤出股票信息，取最新的股票价格信息，遍历所以组合，计算每个组合的价格
     */
 
     var stock_price = 100
@@ -129,6 +134,7 @@ object SimpleApp{
         (portfolio._1, stock_price)
     }
 
+    //遍历所有组合,计算当前的价格
     val portfolio_prices = stateDstream.map(caculate_portfolio)
     portfolio_prices.print()
 
