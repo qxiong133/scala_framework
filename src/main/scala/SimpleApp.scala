@@ -46,6 +46,7 @@ object SimpleApp{
 
   def process_portfolio(portfolio: Array[String]) : (String, Array[String]) = {
   //def process_portfolio(portfolio: Array[String]) : (String, String) = {
+	// 组合ID , 组合持仓明细
         return (portfolio(1), portfolio.slice(2, portfolio.length))
         //return (portfolio(1), portfolio(2))
     }
@@ -109,9 +110,9 @@ object SimpleApp{
     //portfolios.print()
 
     
-    val words = lines.flatMap(_.split(" "))
+    //val words = lines.flatMap(_.split(" "))
 
-    val wordDstream = words.map(x => (x, 1))
+    //val wordDstream = words.map(x => (x, 1))
 
     // Update the cumulative count using updateStateByKey
     // This will give a Dstream made of state (which is the cumulative count of the words)
@@ -130,6 +131,8 @@ object SimpleApp{
 
     val portfolio_prices = stateDstream.map(caculate_portfolio)
     portfolio_prices.print()
+
+    //portfolio_prices.foreachRDD(connect redis,save)
 
     ssc.start()
     ssc.awaitTermination()
