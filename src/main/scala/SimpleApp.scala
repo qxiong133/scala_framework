@@ -102,6 +102,7 @@ object SimpleApp{
     val lines = ssc.socketTextStream(args(0), args(1).toInt)
 
     /*todo:
+	luigi进行两个脚本的依赖调度
 	python功能
 	1. 这个streaming起来前,启动一个python程序负责读取全部的mysql组合全量数据,发送给kafka,用来初始化组合信息
            然后python程序订阅redis的股票实时价格信息,发送给kafka,spark streaming只从kafka上面接收所有的消息
